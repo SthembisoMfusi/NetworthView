@@ -1,0 +1,241 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Authentication Models (Auth.js)
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts            Account[]
+  sessions            Session[]
+  transactions        Transaction[]
+  categories          Category[]
+  budgets             Budget[]
+  recurringTransactions RecurringTransaction[]
+  plaidAccounts       PlaidAccount[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================
+// Core Finance Models
+// ============================================
+
+model Category {
+  id          String       @id @default(cuid())
+  name        String
+  type        TransactionType
+  icon        String?
+  color       String?      @default("#6B7280")
+  userId      String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions    Transaction[]
+  budgets         Budget[]
+
+  @@unique([name, userId])
+  @@map("categories")
+}
+
+model Transaction {
+  id          String          @id @default(cuid())
+  amount      Float
+  type        TransactionType
+  date        DateTime        @default(now())
+  note        String?
+  userId      String
+  categoryId  String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@index([userId, categoryId])
+  @@map("transactions")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+// ============================================
+// Phase 2: Budget & Recurring Models
+// ============================================
+
+model Budget {
+  id          String       @id @default(cuid())
+  categoryId  String
+  limit       Float
+  period      BudgetPeriod @default(MONTHLY)
+  userId      String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  startDate   DateTime     @default(now())
+  endDate     DateTime?
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, userId, period, startDate])
+  @@map("budgets")
+}
+
+enum BudgetPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+model RecurringTransaction {
+  id          String                @id @default(cuid())
+  amount      Float
+  type        TransactionType
+  categoryId  String?
+  note        String?
+  frequency   RecurringFrequency    @default(MONTHLY)
+  nextDate    DateTime
+  lastRun     DateTime?
+  userId      String
+  isActive    Boolean               @default(true)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  // Relations
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([userId, nextDate])
+  @@map("recurring_transactions")
+}
+
+enum RecurringFrequency {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+// ============================================
+// Phase 3: Plaid Integration Models
+// ============================================
+
+model PlaidAccount {
+  id                    String            @id @default(cuid())
+  userId                String
+  itemId                String            @unique
+  accessToken           String            @db.Text
+  institutionId         String
+  institutionName       String
+  accountId             String
+  accountName           String
+  accountType           String
+  accountSubtype        String?
+  mask                  String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  // Relations
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plaidTransactions PlaidTransaction[]
+
+  @@index([userId])
+  @@map("plaid_accounts")
+}
+
+model PlaidTransaction {
+  id                  String          @id @default(cuid())
+  plaidAccountId      String
+  plaidTransactionId  String          @unique
+  amount              Float
+  date                DateTime
+  authorizedDate      DateTime?
+  name                String
+  merchantName        String?
+  category            String[]
+  primaryCategory     String?
+  subcategory         String?
+  paymentChannel      String
+  personalFinanceCategory String?
+  notes               String?
+  isPending           Boolean         @default(false)
+  isImported          Boolean         @default(false)
+  importedAt          DateTime?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  // Relations
+  plaidAccount    PlaidAccount   @relation(fields: [plaidAccountId], references: [id], onDelete: Cascade)
+
+  @@index([plaidAccountId, date])
+  @@map("plaid_transactions")
+}
+
