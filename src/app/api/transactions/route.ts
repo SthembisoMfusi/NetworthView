@@ -9,11 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
-import { validateTransactionInput } from '@/lib/utils/validation'
-import type { CreateTransactionInput, ApiResponse, Transaction } from '@/types'
+ 
 
 /**
  * GET /api/transactions
@@ -37,6 +33,7 @@ import type { CreateTransactionInput, ApiResponse, Transaction } from '@/types'
  * GET /api/transactions?type=EXPENSE&startDate=2024-01-01&page=1&limit=20
  */
 export async function GET(request: NextRequest) {
+  void request;
   try {
     // TODO: Implement GET handler
     // 1. Get authenticated session using getServerSession
@@ -83,6 +80,7 @@ export async function GET(request: NextRequest) {
  * }
  */
 export async function POST(request: NextRequest) {
+  void request;
   try {
     // TODO: Implement POST handler
     // 1. Get authenticated session using getServerSession

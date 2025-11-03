@@ -9,7 +9,6 @@
 'use client'
 
 import { useState } from 'react'
-import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import type { LoginFormData } from '@/types'
 import { validateEmail } from '@/lib/utils/validation'
@@ -26,7 +25,8 @@ interface LoginFormProps {
  * @param onError - Callback when login fails
  */
 export default function LoginForm({ onSuccess, onError }: LoginFormProps) {
-  const router = useRouter()
+  void onSuccess; void onError;
+  const router = useRouter(); void router;
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: ''

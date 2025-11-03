@@ -24,6 +24,7 @@ export function transformPlaidTransaction(
   plaidTransaction: any, // TODO: Use Plaid transaction type
   plaidAccountId: string
 ): Omit<PlaidTransaction, 'id' | 'createdAt' | 'updatedAt'> {
+  void plaidTransaction;
   // TODO: Implement transformation logic
   // Extract relevant fields from Plaid transaction object
   // Map to our PlaidTransaction schema
@@ -63,6 +64,7 @@ export async function syncPlaidTransactions(
   plaidTransactions: any[], // TODO: Use Plaid transaction array type
   plaidAccountId: string
 ): Promise<PlaidTransaction[]> {
+  void plaidTransactions; void plaidAccountId;
   // TODO: Implement sync logic
   // 1. Transform each Plaid transaction using transformPlaidTransaction
   // 2. Check if transaction already exists (by plaidTransactionId)

@@ -90,9 +90,10 @@ model Category {
   updatedAt   DateTime     @updatedAt
 
   // Relations
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions    Transaction[]
-  budgets         Budget[]
+  user                   User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions           Transaction[]
+  budgets                Budget[]
+  recurringTransactions  RecurringTransaction[]
 
   @@unique([name, userId])
   @@map("categories")

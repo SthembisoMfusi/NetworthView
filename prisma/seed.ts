@@ -152,7 +152,7 @@ async function main() {
     },
   })
 
-  console.log('Created budget')
+  console.log('Created budget:', budget.id)
 
   // Create a recurring transaction
   const recurringTransaction = await prisma.recurringTransaction.create({
@@ -168,7 +168,7 @@ async function main() {
     },
   })
 
-  console.log('Created recurring transaction')
+  console.log('Created recurring transaction:', recurringTransaction.id)
 
   console.log('Seed completed successfully!')
 }

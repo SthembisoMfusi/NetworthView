@@ -10,11 +10,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
-import { validateTransactionInput } from '@/lib/utils/validation'
-import type { UpdateTransactionInput, ApiResponse, Transaction } from '@/types'
+ 
 
 /**
  * GET /api/transactions/[id]
@@ -28,8 +24,9 @@ import type { UpdateTransactionInput, ApiResponse, Transaction } from '@/types'
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  void request; void context;
   try {
     // TODO: Implement GET handler
     // 1. Get authenticated session using getServerSession
@@ -69,8 +66,9 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  void request; void context;
   try {
     // TODO: Implement PUT handler
     // 1. Get authenticated session using getServerSession
@@ -104,8 +102,9 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  void request; void context;
   try {
     // TODO: Implement DELETE handler
     // 1. Get authenticated session using getServerSession

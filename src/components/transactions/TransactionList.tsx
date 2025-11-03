@@ -12,7 +12,6 @@ import type { Transaction } from '@/types'
 interface TransactionListProps {
   transactions: Transaction[]
   isLoading?: boolean
-  onTransactionClick?: (transaction: Transaction) => void
   onTransactionEdit?: (transaction: Transaction) => void
   onTransactionDelete?: (transaction: Transaction) => void
 }
@@ -20,7 +19,6 @@ interface TransactionListProps {
 export default function TransactionList({ 
   transactions, 
   isLoading,
-  onTransactionClick,
   onTransactionEdit,
   onTransactionDelete 
 }: TransactionListProps) {

@@ -11,11 +11,11 @@
  * - User registration and login
  */
 
-import { NextAuthOptions } from 'next-auth'
+import type { NextAuthConfig } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from './prisma'
-import bcrypt from 'bcryptjs'
+ 
 
 /**
  * NextAuth configuration options
@@ -28,7 +28,7 @@ import bcrypt from 'bcryptjs'
  * 
  * @returns NextAuthOptions configuration object
  */
-export const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthConfig = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
@@ -37,7 +37,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' }
       },
-      async authorize(credentials) {
+      async authorize(_credentials) {
         // TODO: Implement user authentication logic
         // 1. Find user by email using prisma.user.findUnique
         // 2. If user doesn't exist, return null
@@ -79,27 +79,5 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 }
 
-declare module 'next-auth' {
-  interface Session {
-    user: {
-      id: string
-      email: string
-      name?: string | null
-      image?: string | null
-    }
-  }
-  
-  interface User {
-    id: string
-    email: string
-    name?: string | null
-  }
-}
-
-declare module 'next-auth/jwt' {
-  interface JWT {
-    id: string
-    email: string
-  }
-}
+ 
 

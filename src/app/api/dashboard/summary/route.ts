@@ -5,13 +5,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
-import { calculateNetBalance, calculateTotalIncome, calculateTotalExpenses, getTransactionsForMonth } from '@/lib/calculations/transactions'
-import type { DashboardSummary } from '@/types'
 
 export async function GET(request: NextRequest) {
+  void request;
   try {
     // TODO: Implement GET handler
     // 1. Get authenticated user

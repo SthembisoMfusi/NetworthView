@@ -5,10 +5,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
+  void request;
   try {
     // TODO: Implement GET handler for chart data
     return NextResponse.json({ success: false, error: 'Not implemented' }, { status: 501 })

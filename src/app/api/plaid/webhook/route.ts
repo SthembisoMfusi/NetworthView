@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
+  void request;
   try {
     // TODO: Implement webhook handler
     // 1. Verify webhook signature

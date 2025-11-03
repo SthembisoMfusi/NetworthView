@@ -6,11 +6,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+ 
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  void request; void context;
   try {
     // TODO: Implement GET handler
     return NextResponse.json({ success: false, error: 'Not implemented' }, { status: 501 })
@@ -19,7 +18,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  void request; void context;
   try {
     // TODO: Implement PUT handler
     return NextResponse.json({ success: false, error: 'Not implemented' }, { status: 501 })
@@ -28,7 +28,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  void request; void context;
   try {
     // TODO: Implement DELETE handler
     return NextResponse.json({ success: false, error: 'Not implemented' }, { status: 501 })

@@ -15,7 +15,8 @@ interface SignupFormProps {
 }
 
 export default function SignupForm({ onSuccess, onError }: SignupFormProps) {
-  const router = useRouter()
+  void onSuccess; void onError;
+  const router = useRouter(); void router;
   const [formData, setFormData] = useState<SignupFormData>({
     name: '',
     email: '',
