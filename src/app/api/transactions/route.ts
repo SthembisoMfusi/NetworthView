@@ -8,6 +8,8 @@
  * Authentication: Required
  */
 
+import { authOptions } from '@/lib/auth';
+import prisma from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server'
  
 
@@ -35,15 +37,44 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function GET(request: NextRequest) {
   void request;
   try {
-    // TODO: Implement GET handler
-    // 1. Get authenticated session using getServerSession
-    // 2. If no session, return 401 Unauthorized
-    // 3. Extract query parameters from URLSearchParams
-    // 4. Build Prisma where clause with filters
-    // 5. Fetch transactions with pagination
-    // 6. Return JSON response with transactions and pagination metadata
-    
-    return NextResponse.json({ success: false, error: 'Not implemented' }, { status: 501 })
+
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+    const { startDate, endDate, categoryId, type, search, page, limit, sortBy, sortOrder } =
+      Object.fromEntries(request.nextUrl.searchParams)
+    const whereClause = {
+      userId: session.user.id,
+      ...(startDate && { date: { gte: new Date(startDate) } }),
+      ...(endDate && { date: { lte: new Date(endDate) } }),
+      ...(categoryId && { categoryId }),
+      ...(type && { type }),
+      ...(search && { note: { contains: search } }),
+    }
+    const transactions = await prisma.transaction.findMany({
+      where: whereClause,
+      skip: (Number(page) - 1) * Number(limit),
+      take: Number(limit),
+      orderBy: {
+        [sortBy]: sortOrder === 'desc' ? 'desc' : 'asc',
+      },
+    })
+    const count = await prisma.transaction.count({ where: whereClause })
+    const totalPages = Math.ceil(count / Number(limit))
+    const totalAmount = await prisma.transaction.aggregate({
+      where: whereClause,
+      _sum: { amount: true },
+    })
+    const netWorth = totalAmount._sum.amount || 0
+    const data = {
+      transactions,
+      totalPages,
+      totalAmount,
+      netWorth,
+    } 
+
+    return NextResponse.json(data, { status: 200 })
   } catch (error) {
     console.error('Error fetching transactions:', error)
     return NextResponse.json(
@@ -82,16 +113,23 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   void request;
   try {
-    // TODO: Implement POST handler
-    // 1. Get authenticated session using getServerSession
-    // 2. If no session, return 401 Unauthorized
-    // 3. Parse and validate request body
-    // 4. Validate transaction input using validateTransactionInput
-    // 5. If invalid, return 400 with error message
-    // 6. Create transaction in database with userId
-    // 7. Return created transaction with 201 status
-    
-    return NextResponse.json({ success: false, error: 'Not implemented' }, { status: 501 })
+  
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+    const { amount, type, date, categoryId, note } = await request.json()
+    const transaction = await prisma.transaction.create({
+      data: {
+        amount,
+        type,
+        date,
+        categoryId,
+        note,
+        userId: session.user.id,
+      },
+    })
+    return NextResponse.json(transaction, { status: 201 })
   } catch (error) {
     console.error('Error creating transaction:', error)
     return NextResponse.json(

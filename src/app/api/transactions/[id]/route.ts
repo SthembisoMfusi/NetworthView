@@ -9,6 +9,8 @@
  * Authentication: Required
  */
 
+import { authOptions } from '@/lib/auth';
+import prisma from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server'
  
 
@@ -28,14 +30,21 @@ export async function GET(
 ) {
   void request; void context;
   try {
-    // TODO: Implement GET handler
-    // 1. Get authenticated session using getServerSession
-    // 2. If no session, return 401 Unauthorized
-    // 3. Fetch transaction by ID and userId from database
-    // 4. If not found, return 404
-    // 5. Return transaction JSON response
+
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+    const { id } = await context.params
+    const transaction = await prisma.transaction.findUnique({
+      where: { id, userId: session.user.id },
+    })
+    if (!transaction) {
+      return NextResponse.json({ success: false, error: 'Transaction not found' }, { status: 404 })
+    }
+    return NextResponse.json(transaction)  
     
-    return NextResponse.json({ success: false, error: 'Not implemented' }, { status: 501 })
+    
   } catch (error) {
     console.error('Error fetching transaction:', error)
     return NextResponse.json(
@@ -70,17 +79,33 @@ export async function PUT(
 ) {
   void request; void context;
   try {
-    // TODO: Implement PUT handler
-    // 1. Get authenticated session using getServerSession
-    // 2. If no session, return 401 Unauthorized
-    // 3. Fetch existing transaction by ID and userId
-    // 4. If not found, return 404
-    // 5. Parse and validate request body
-    // 6. If invalid, return 400 with error message
-    // 7. Update transaction in database
-    // 8. Return updated transaction JSON response
+
+
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+    const { id } = await context.params
+    const transaction = await prisma.transaction.findUnique({
+      where: { id, userId: session.user.id },
+    })
+    if (!transaction) {
+      return NextResponse.json({ success: false, error: 'Transaction not found' }, { status: 404 })
+    }
+    const { amount, type, date, categoryId, note } = await request.json()
+    const updatedTransaction = await prisma.transaction.update({
+      where: { id },
+      data: {
+        amount,
+        type,
+        date,
+        categoryId,
+        note,
+      },
+    })
+    return NextResponse.json(updatedTransaction)
     
-    return NextResponse.json({ success: false, error: 'Not implemented' }, { status: 501 })
+    
   } catch (error) {
     console.error('Error updating transaction:', error)
     return NextResponse.json(
@@ -106,15 +131,21 @@ export async function DELETE(
 ) {
   void request; void context;
   try {
-    // TODO: Implement DELETE handler
-    // 1. Get authenticated session using getServerSession
-    // 2. If no session, return 401 Unauthorized
-    // 3. Fetch existing transaction by ID and userId
-    // 4. If not found, return 404
-    // 5. Delete transaction from database
-    // 6. Return success JSON response with 200 status
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+    const { id } = await context.params
+    const transaction = await prisma.transaction.findUnique({
+      where: { id, userId: session.user.id },
+    })
+    if (!transaction) {
+      return NextResponse.json({ success: false, error: 'Transaction not found' }, { status: 404 })
+    }
+    await prisma.transaction.delete({ where: { id } })
+    return NextResponse.json({ success: true, message: 'Transaction deleted successfully' })
     
-    return NextResponse.json({ success: false, error: 'Not implemented' }, { status: 501 })
+    
   } catch (error) {
     console.error('Error deleting transaction:', error)
     return NextResponse.json(
@@ -122,5 +153,9 @@ export async function DELETE(
       { status: 500 }
     )
   }
+}
+
+  function getServerSession(authOptions: any) {
+  throw new Error('Function not implemented.');
 }
 
