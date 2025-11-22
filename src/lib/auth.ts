@@ -38,13 +38,24 @@ export const authOptions: NextAuthConfig = {
         password: { label: 'Password', type: 'password' }
       },
       async authorize(_credentials) {
-        // TODO: Implement user authentication logic
-        // 1. Find user by email using prisma.user.findUnique
-        // 2. If user doesn't exist, return null
-        // 3. Verify password using bcrypt.compare
-        // 4. If password is invalid, return null
-        // 5. Return user object with id and email (omit password)
-        return null
+    
+        const user = await prisma.user.findUnique({
+          where: { email: _credentials?.email },
+        })
+        if (!user) {
+          return null
+        }
+        const isPasswordValid = await bcrypt.compare(
+          _credentials?.password,
+          user.password
+        )
+        if (!isPasswordValid) {
+          return null
+        }
+        return {
+          id: user.id,
+          email: user.email,
+        }
       }
     })
   ],
@@ -59,12 +70,13 @@ export const authOptions: NextAuthConfig = {
   },
   callbacks: {
     async jwt({ token, user }) {
-      // TODO: Implement JWT callback
-      // Add user id and email to token when user logs in
+      
       if (user) {
         token.id = user.id
         token.email = user.email
-      }
+      } 
+
+
       return token
     },
     async session({ session, token }) {
